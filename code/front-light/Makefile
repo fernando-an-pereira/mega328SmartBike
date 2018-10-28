@@ -17,10 +17,10 @@ LIBS             = $(patsubst lib%.a,-l%,$(LIB_NAMES))
 LINK_LIBS        = -L./ $(LIBS)
 
 HFUSE            = 0xD9
-LFUSE            = 0xFF
-EFUSE            = 0x04
+LFUSE            = 0xFD
+EFUSE            = 0xFE
 
-HZ               = 20000000
+HZ               = 4000000
 
 B_RATE           = $(shell echo $$(( 4000000 / $(HZ) + 1 )) )
 
