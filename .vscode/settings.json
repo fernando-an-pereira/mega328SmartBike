@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "sleep.h": "c",
+        "interrupt.h": "c",
+        "io.h": "c",
+        "iom328p.h": "c",
+        "stdint.h": "c",
+        "delay.h": "c"
+    }
+}
