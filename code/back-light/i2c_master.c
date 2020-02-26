@@ -100,8 +100,3 @@ void i2c_send_bytes(uint8_t *tx_buffer, uint8_t *rx_buffer, uint8_t tx_size,
 uint8_t is_ic2_transmitting() {
     return (_i2c_tx_buffer.remaining != 0 || _i2c_rx_buffer.remaining != 0);
 }
-
-void i2c_wait() {
-    while (is_ic2_transmitting())
-        ;
-}
