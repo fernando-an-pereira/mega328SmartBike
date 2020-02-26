@@ -1,5 +1,11 @@
 PRG              = front-light
-OBJ_TEST         = main.o
+
+SRC              = ./main.c
+SRC              += ./serial.c
+SRC              += ./i2c_master.c
+SRC              += ./ds1307.c
+
+OBJS             = $(SRC:.c=.o)
 
 LIB_NAME         = #
 OTHER_LIBS_NAMES = #
@@ -11,16 +17,23 @@ PORT             = usb
 MCU_TARGET       = atmega328p
 AVRDUDE_TARGET   = atmega328p
 
+HZ               = 20000000
+SERIAL_BAUD      = 38400
+
+DEFINE           = F_CPU=$(HZ)
+
+DEFINE           += SERIAL_BAUD=$(SERIAL_BAUD)
+DEFINE           += I2C_SCL_FREQ=10000
+DEFINE           += I2C_PRESCALER=16
+
 OPTIMIZE         = -Os
-DEFS             =
+DEFS             = $(patsubst %,-D%,$(DEFINE))
 LIBS             = $(patsubst lib%.a,-l%,$(LIB_NAMES))
 LINK_LIBS        = -L./ $(LIBS)
 
-HFUSE            = 0xD9
-LFUSE            = 0xFD
-EFUSE            = 0xFE
-
-HZ               = 4000000
+LFUSE            = 0xFF
+HFUSE            = 0xDF
+EFUSE            = 0xFF
 
 B_RATE           = $(shell echo $$(( 4000000 / $(HZ) + 1 )) )
 
@@ -31,7 +44,7 @@ AR               = avr-ar
 
 # Override is only needed by avr-lib build system.
 
-override CFLAGS        = -g -DF_CPU=$(HZ) -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS        = -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
 override LDFLAGS       = -Wl,-Map,$(PRG).map
 
 OBJCOPY        = avr-objcopy
@@ -39,7 +52,7 @@ OBJDUMP        = avr-objdump
 
 all: $(LIB_NAMES) $(PRG).elf lst text #eeprom
 
-$(PRG).elf: $(OBJ_TEST)
+$(PRG).elf: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LINK_LIBS)
 
 lib%.a : %.o
@@ -102,12 +115,16 @@ fuse:
 	avrdude -F -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -P $(PORT) -v \
 	-B $(B_RATE) -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m
 
+read_fuse:
+	avrdude -F -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -P $(PORT) -v \
+	-B $(B_RATE) -U lfuse:r:-:i -U hfuse:r:-:i -U efuse:r:-:i
+
 #fuse:
 #	sudo avrdude -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -P $(PORT) -v \
 #	-U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m
 
-seial:
-	gtkterm -p /dev/ttyUSB0
+serial:
+	gtkterm -p /dev/ttyUSB0 -s $(SERIAL_BAUD)
 
 ddd: gdbinit
 	ddd --debugger "avr-gdb -x $(GDBINITFILE)"
@@ -116,6 +133,9 @@ gdbserver: gdbinit
 	simulavr --device $(MCU_TARGET) --gdbserver
 
 gdbinit: $(GDBINITFILE)
+
+size: $(PRG).elf
+	avr-size $<
 
 $(GDBINITFILE): $(PRG).hex
 	@echo "file $(PRG).elf" > $(GDBINITFILE)
