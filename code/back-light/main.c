@@ -4,75 +4,81 @@
 #include <stdint.h>
 #include <util/delay.h>
 
+// #include "data_structures.h"
 #include "ds1307.h"
 #include "i2c_master.h"
 #include "serial.h"
 
-char _convert_bcd_to_string(uint8_t hex) { return hex + '0'; }
+char int_to_char(uint8_t n) { return n + '0'; }
 
-char _convert_hex_to_string(uint8_t hex) {
-    if (hex >= 10) {
-        return hex - 10 + 'A';
-    }
-    return _convert_bcd_to_string(hex);
+void convert_time_to_string(Time *time, char *time_string) {
+    time_string[0] = '2';
+    time_string[1] = '0';
+    time_string[2] = int_to_char(time->year >> 4);
+    time_string[3] = int_to_char(time->year & 0x0F);
+
+    time_string[4] = '-';
+
+    time_string[5] = int_to_char(time->month >> 4);
+    time_string[6] = int_to_char(time->month & 0x0F);
+
+    time_string[7] = '-';
+
+    time_string[8] = int_to_char(time->date >> 4);
+    time_string[9] = int_to_char(time->date & 0x0F);
+
+    time_string[10] = 'T';
+
+    time_string[11] = int_to_char(time->hours >> 4);
+    time_string[12] = int_to_char(time->hours & 0x0F);
+
+    time_string[13] = ':';
+
+    time_string[14] = int_to_char(time->minutes >> 4);
+    time_string[15] = int_to_char(time->minutes & 0x0F);
+
+    time_string[16] = ':';
+
+    time_string[17] = int_to_char(time->seconds >> 4);
+    time_string[18] = int_to_char(time->seconds & 0x0F);
+
+    time_string[19] = '\r';
+    time_string[20] = '\0';
 }
 
 int main(void) {
-    uint8_t sec_h, sec_l, min_h, min_l, hour_h, hour_l, day, date_h, date_l,
-        month_h, month_l, year_h, year_l;
+    Time time;
 
-    char string[22];
+    char string[32];
 
     DDRB |= (1 << DDB1);
     PORTB = 0;
 
     init_serial();
+    init_i2c_master();
 
     sei();
 
-    safe_transmit_string_serial("TOP0!\r\n");
+    // time.seconds = 0x00;
+    // time.minutes = 0x00;
+    // time.hours = 0x00;
+    // time.date = 0x01;
+    // time.month = 0x01;
+    // time.year = 0x20;
+    // time.day = 0x04;
 
-    init_i2c_master();
-
-    _delay_ms(500);
-
-    safe_transmit_string_serial("TOP1!\r\n");
-
-    // ds1307_set_time_zero();
-
-    safe_transmit_string_serial("TOP2!\r\n");
+    // ds1307_set_time(&time);
 
     while (1) {
+        if (!is_ic2_transmitting()) {
+            ds1307_request_time();
+        }
         _delay_ms(100);
-        // safe_transmit_string_serial("TOP!\r\n");
-
-        ds1307_read_time(&sec_h, &sec_l, &min_h, &min_l, &hour_h, &hour_l, &day,
-                         &date_h, &date_l, &month_h, &month_l, &year_h,
-                         &year_l);
-
-        string[0] = '2';
-        string[1] = '0';
-        string[2] = _convert_bcd_to_string(year_h);
-        string[3] = _convert_bcd_to_string(year_l);
-        string[4] = '-';
-        string[5] = _convert_bcd_to_string(month_h);
-        string[6] = _convert_bcd_to_string(month_l);
-        string[7] = '-';
-        string[8] = _convert_bcd_to_string(date_h);
-        string[9] = _convert_bcd_to_string(date_l);
-        string[10] = 'T';
-        string[11] = _convert_bcd_to_string(hour_h);
-        string[12] = _convert_bcd_to_string(hour_l);
-        string[13] = ':';
-        string[14] = _convert_bcd_to_string(min_h);
-        string[15] = _convert_bcd_to_string(min_l);
-        string[16] = ':';
-        string[17] = _convert_bcd_to_string(sec_h);
-        string[18] = _convert_bcd_to_string(sec_l);
-        string[19] = '\r';
-        string[20] = '\0';
-        string[21] = '\0';
-
-        safe_transmit_string_serial(string);
+        if (!is_ic2_transmitting()) {
+            ds1307_get_time(&time);
+            convert_time_to_string(&time, string);
+            safe_transmit_string_serial(string);
+        }
+        _delay_ms(100);
     }
 }
