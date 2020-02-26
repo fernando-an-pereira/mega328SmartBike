@@ -11,5 +11,4 @@ void i2c_send_bytes(uint8_t* tx_buffer, uint8_t* rx_buffer, uint8_t tx_size,
                     uint8_t rx_size, uint8_t slave_address);
 uint8_t is_ic2_transmitting();
 
-#undef _I2C_MASTER_H
 #endif

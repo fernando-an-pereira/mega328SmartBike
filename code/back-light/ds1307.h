@@ -36,5 +36,4 @@ uint8_t ds1307_set_time(Time *time);
 uint8_t ds1307_request_time();
 void ds1307_get_time(Time *time);
 
-#undef DS1307_H_
 #endif

@@ -33,5 +33,4 @@ void init_serial();
 void transmit_string_serial(char* string);
 void safe_transmit_string_serial(char* string);
 
-#undef _SERIAL_H
 #endif

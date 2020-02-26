@@ -1,4 +1,4 @@
-PRG              = front-light
+PRG              = back-light
 
 SRC              = ./main.c
 SRC              += ./serial.c
@@ -24,7 +24,7 @@ DEFINE           = F_CPU=$(HZ)
 
 DEFINE           += SERIAL_BAUD=$(SERIAL_BAUD)
 DEFINE           += I2C_SCL_FREQ=10000
-DEFINE           += I2C_PRESCALER=16
+DEFINE           += I2C_PRESCALER=4
 
 OPTIMIZE         = -Os
 DEFS             = $(patsubst %,-D%,$(DEFINE))

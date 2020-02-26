@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <util/delay.h>
 
-// #include "data_structures.h"
+#include "data_structures.h"
 #include "ds1307.h"
 #include "i2c_master.h"
 #include "serial.h"
@@ -59,15 +59,15 @@ int main(void) {
 
     sei();
 
-    // time.seconds = 0x00;
-    // time.minutes = 0x00;
-    // time.hours = 0x00;
-    // time.date = 0x01;
-    // time.month = 0x01;
-    // time.year = 0x20;
-    // time.day = 0x04;
+    time.seconds = 0x00;
+    time.minutes = 0x00;
+    time.hours = 0x00;
+    time.date = 0x01;
+    time.month = 0x01;
+    time.year = 0x20;
+    time.day = 0x04;
 
-    // ds1307_set_time(&time);
+    ds1307_set_time(&time);
 
     while (1) {
         if (!is_ic2_transmitting()) {

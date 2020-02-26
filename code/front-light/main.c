@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <util/delay.h>
 
-// #include "data_structures.h"
+#include "data_structures.h"
 #include "ds1307.h"
 #include "i2c_master.h"
 #include "serial.h"

@@ -18,5 +18,4 @@ typedef struct _time {
     uint8_t year;
 } Time;
 
-#undef _DATA_STRUCTURES_H
 #endif
